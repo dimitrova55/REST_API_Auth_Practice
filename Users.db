@@ -1,2 +1,3 @@
-{"name":"Dilyana","email":"dilly@mail.bg","password":"$2a$10$1DPlwzywFbgE57M0qt6kgOS2AxEFePDYzDuZi1coouOBGE5/5szqe","_id":"2gLY6CZsrr8QqI7w"}
-{"name":"Bruno","email":"bm@mail.bg","password":"$2a$10$xnSg5KpTTvCdoW5KE/63Seja/.pO/WYX/94maDoGwYw0qRMiBJS8q","_id":"spEeS3wBpIhdzWue"}
+{"name":"Dominic Dalton","email":"a.nunc@yahoo.couk","password":"$2a$10$tXcYZFHT9ERHgaWfEdjCKeaSnVF2/gx2tS8QO34.JFaPzXcCQq5OK","role":"admin","_id":"29FEzcQqQ5OwoGvx"}
+{"name":"Pippo Bellworthy","email":"pbellworthy0@ask.com","password":"$2a$10$E5pSFdA7HvtIKv52DXMbz.5W/gcN94gYgAIhELHswe5sK1ipo39Qy","role":"member","_id":"IJgk4bhkqQPAGSkm"}
+{"name":"Maria Crawford","email":"m.crawford@randatmail.com","password":"$2a$10$sHwGi19ydGpP3oxqQOW1/.LUi3TQrqdEyj7Ihq0Hkq4RbAvJ6ePBC","role":"moderator","_id":"Jo0G8Pq03vJIzvtL"}
