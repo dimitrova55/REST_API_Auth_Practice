@@ -3,7 +3,10 @@
  */
 
 export const accessTokenSecret = 'myAccessTokenSecret';
-export const accessTokenExpiresIn = '30s';
+export const accessTokenExpiresIn = '30m';
 
 export const refreshTokenSecret = 'myRefreshTokenSecret';
-export const refreshTokenExpiresIn = '2m';
+export const refreshTokenExpiresIn = '1w';
+
+export const cacheTemporaryTokenPrefix = 'temp_token: ';
+export const cacheTemporaryTokenExpiresInSeconds = 180;

@@ -3,6 +3,10 @@ import Datastore from "nedb-promises";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import * as config from "./config.js";
+import { authenticator } from "otplib";
+import qrcode from "qrcode";
+import crypto from "crypto";
+import NodeCache from "node-cache";
 
 const app = express();
 const port = 3000;
@@ -10,9 +14,12 @@ const port = 3000;
 // Middleware
 app.use(express.json());
 
+const cache = new NodeCache();
+
 // Create a database instance
 const usersDB = Datastore.create('Users.db');
 const userRefreshTokensDB = Datastore.create('UserRefreshTokens.db');
+const userInvalidTokensDB = Datastore.create('UserInvalidTokens.db');   // once the user has logout the access token goes to the 'black list'
 
 // 'GET'
 app.get('/', (req, res) => {
@@ -44,7 +51,9 @@ app.post('/api/auth/register', async (req, res) => {
             name: name,
             email: email,
             password: hashedPassword,
-            role: role ? role : 'member'
+            role: role ? role : 'member',
+            'twoFaEnable': false,
+            'twoFaSecret': null
         });
 
         res.status(201).json({
@@ -82,6 +91,76 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(401).json({message: "Incorrect password!"});
         }
 
+        //Check if the 2fa is enabled
+        if(user.twoFaEnable){
+            const tempToken = crypto.randomUUID();
+
+            cache.set(
+                config.cacheTemporaryTokenPrefix + tempToken, 
+                user._id, 
+                config.cacheTemporaryTokenExpiresInSeconds
+            );
+            
+            return res.status(200).json({ 
+                tempToken, 
+                expiresInSeconds: config.cacheTemporaryTokenExpiresInSeconds
+            });
+        
+        } else {    // the 2fa is Not enabled
+
+            // Create Access Token
+            const accessToken = jwt.sign(
+                {userId: user._id},
+                config.accessTokenSecret,
+                {subject: 'accessApi', expiresIn: config.accessTokenExpiresIn}
+            );
+
+            // Create Refresh Token
+            const refreshToken = jwt.sign(
+                {userId: user._id},
+                config.refreshTokenSecret,
+                {subject: 'refreshToken', expiresIn: config.refreshTokenExpiresIn}
+            );
+
+            // Save the refresh token in the database
+            await userRefreshTokensDB.insert({
+                refreshToken: refreshToken,
+                userId: user._id
+            });
+
+            return res.status(200).json({
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                accessToken: accessToken,
+                refreshToken: refreshToken
+            });
+        }
+    } catch (error) {
+        res.status(500).json({message: error.message});        
+    }   
+    
+});
+
+app.post('/api/auth/login/2fa', async (req, res) => {
+    try {
+        const { tempToken, totp } = req.body;
+
+        if(!tempToken || !topt)
+            return res.status(422).json({ message: 'Please fill out all fields: tempToken and totp.' });
+
+        const userId = cache.get(config.cacheTemporaryTokenPrefix + tempToken);
+
+        if(!userId)
+            return res.status(401).json({ messasge: 'The provided temporarily token is incorrect or expired.' });
+
+        const user = await usersDB.findOne({ _id: userId });
+
+        const verify = authenticator.check(totp, user.twoFaSecret);
+
+        if(!verify)
+            return res.status(401).json({ message: 'The provided TOTP is incorrect or expired!' });
+
         // Create Access Token
         const accessToken = jwt.sign(
             {userId: user._id},
@@ -110,12 +189,10 @@ app.post('/api/auth/login', async (req, res) => {
             refreshToken: refreshToken
         });
 
-
     } catch (error) {
-        res.status(500).json({message: error.message});        
-    }   
-    
-});
+        res.status(500).json({message: error.message});  
+    }
+})
 
 /**
  * 'POST' 
@@ -141,7 +218,7 @@ app.post('/api/auth/refresh-token', async(req, res) => {
 
         // Remove the token from the database
         await userRefreshTokensDB.remove({_id: UserRefreshToken._id});
-        await userRefreshTokensDB.persistence.compactDatafile();
+        userRefreshTokensDB.compactDatafile();
 
         // Create new Access and Refresh tokens
         const accessToken = jwt.sign(
@@ -175,12 +252,86 @@ app.post('/api/auth/refresh-token', async(req, res) => {
     }
 });
 
+/**
+ * 'GET'
+ * two-factor authentication
+ */
+app.get('/api/auth/2fa/generate', ensureAuthenticated, async(req, res) => {
+    try {
+        // Get the user details
+        const user = await usersDB.findOne({_id: req.user.id});
+
+        const secret = authenticator.generateSecret();
+        const uri = authenticator.keyuri(user.email, "auth_project", secret);
+
+        await usersDB.update({_id: req.user.id}, {$set: { 'twoFaSecret': secret }});
+        await usersDB.compactDatafile();
+
+        const qrCode = await qrcode.toBuffer(uri, {type: 'image/png', margin: 1});
+
+        res.setHeader('Content-Disposition', 'attachment; filename=qrcode.png');
+        return res.status(200).type('image/png').send(qrCode);
+
+    } catch (error) {
+        return res.status(500).json({message: error.message});
+    }
+});
+
+app.post('/api/auth/2fa/validate', ensureAuthenticated, async(req, res) => {
+    try {
+        // Get the TOTP code generated by the Authenticator app
+        const { totp } = req.body;
+
+        if(!totp){
+            return res.status(422).json({ message: 'TOTP missing.' });
+        }
+
+        const user = await usersDB.findOne({ _id: req.user.id });
+
+        // Verify if the user's secret matches the current TOTP generated by the app
+        const verify = authenticator.check(totp, user.twoFaSecret);
+
+        if(!verify)
+            return res.status(400).json({ message: 'TOTP incorrect or expired.' });
+
+        await usersDB.update({ _id: req.user.id}, { $set: { twoFaEnable: true } });
+        await usersDB.compactDatafile();
+
+        return res.status(200).json({ message: 'TOTP validated successfully.' });
+
+    } catch (error) {
+        return res.status(500).json({message: error.message});
+    }
+});
+
+/**
+ * 'GET'
+ * User Logout
+*/
+app.get('/api/auth/logout', ensureAuthenticated, async (req, res) => {
+    try {
+        // remove all refresh tokens related to the userId
+        await userRefreshTokensDB.removeMany({userId: req.user.id});
+        userRefreshTokensDB.compactDatafile();
+
+        // insert the access token into the 'black' list
+        await userInvalidTokensDB.insert({
+            accessToken: req.accessToken.value,
+            userId: req.user.id,
+            expirationTime: req.accessToken.exp
+        });
+
+        return res.status(204).send();
+    } catch (error) {
+        res.status(500).json({message: error.message}); 
+    }
+});
 
 /**
  * 'GET'
  * Current User
 */
-app.get('/api/users/current', ensureAuthenticated, async(req, res) => {
+app.get('/api/users/current/', ensureAuthenticated, async(req, res) => {
     try {
         // Search for the user in the database
         const user = await usersDB.findOne({_id: req.user.id}); // look at the middleware function for req.user = ...
@@ -199,7 +350,7 @@ app.get('/api/users/current', ensureAuthenticated, async(req, res) => {
  * 'GET'
  * Admin
 */
-app.get('/api/admin/', ensureAuthenticated, authorize(['admin']), async (req, res) => {
+app.get('/api/users/admin/', ensureAuthenticated, authorize(['admin']), async (req, res) => {
     return res.status(200).json({message: "Only admins can access this route!"});
     
 });
@@ -208,7 +359,7 @@ app.get('/api/admin/', ensureAuthenticated, authorize(['admin']), async (req, re
  * 'GET'
  * Moderator
 */
-app.get('/api/moderator/', ensureAuthenticated, authorize(['admin', 'moderator']), async (req, res) => {
+app.get('/api/users/moderator/', ensureAuthenticated, authorize(['admin', 'moderator']), async (req, res) => {
     return res.status(200).json({message: "Only admins and moderators can access this route!"});
     
 });
@@ -221,11 +372,18 @@ async function ensureAuthenticated(req, res, next){
     if(!accessToken)
         return res.status(401).json({message: "Access token not found."});
 
+    // Check if the user had logged out
+    if(await userInvalidTokensDB.findOne({accessToken: accessToken})){
+        return res.status(401).json({message: 'User logged out.'});
+    }
+
     try {
         // if the verification fails, throws an error and goes to the catch
         const decodedAccessToken = jwt.verify(accessToken, config.accessTokenSecret);
 
-        req.user = {id: decodedAccessToken.userId};
+        req.accessToken = {value: accessToken, exp: decodedAccessToken.exp}; // creates req.accessToken
+        req.user = {id: decodedAccessToken.userId};                          // creates req.user
+
         next();
 
     } catch (error) {

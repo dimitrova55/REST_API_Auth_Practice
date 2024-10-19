@@ -1,3 +1,2 @@
-{"name":"Dominic Dalton","email":"a.nunc@yahoo.couk","password":"$2a$10$tXcYZFHT9ERHgaWfEdjCKeaSnVF2/gx2tS8QO34.JFaPzXcCQq5OK","role":"admin","_id":"29FEzcQqQ5OwoGvx"}
-{"name":"Pippo Bellworthy","email":"pbellworthy0@ask.com","password":"$2a$10$E5pSFdA7HvtIKv52DXMbz.5W/gcN94gYgAIhELHswe5sK1ipo39Qy","role":"member","_id":"IJgk4bhkqQPAGSkm"}
-{"name":"Maria Crawford","email":"m.crawford@randatmail.com","password":"$2a$10$sHwGi19ydGpP3oxqQOW1/.LUi3TQrqdEyj7Ihq0Hkq4RbAvJ6ePBC","role":"moderator","_id":"Jo0G8Pq03vJIzvtL"}
+{"name":"Ky Ryhorovich","email":"kryhorovich0@ca.gov","password":"$2a$10$CtUUv8C0QOOiEb2qxarequet0HSWGVArXCR2YViG3aqwx9nMlc.aK","role":"member","twoFaEnable":false,"twoFaSecret":null,"_id":"LdF9kpJpuRFzFJmQ"}
+{"name":"Pippo Bellworthy","email":"pbellworthy0@ask.com","password":"$2a$10$MWVxbZR34IvlemW2Y675cuLWIx/hu0vMbCPY04ygXxs/zDR7.bT6q","role":"member","twoFaEnable":true,"twoFaSecret":"NQXDUYALNQKUAJAU","_id":"cVa1W4VeySwKO26W"}
