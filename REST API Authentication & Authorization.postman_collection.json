@@ -1,0 +1,360 @@
+{
+	"info": {
+		"_postman_id": "0064fae6-d349-450e-9e17-2bb9da2b2fed",
+		"name": "REST API Authentication & Authorization",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37442881"
+	},
+	"item": [
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\":\"Aluino Klemke\",\r\n    \"email\":\"aklemke2@huffingtonpost.com\",\r\n    \"password\": \"123456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/auth/register",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"register"
+					]
+				},
+				"description": "The body takes the \"name\", \"email\" and \"password\" as required parameters, \"role\" is an optional one. If it is not provided, it is assigned as a \"member\" by default."
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"aklemke2@huffingtonpost.com\",\r\n    \"password\": \"123456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/auth/login",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				},
+				"description": "Returns a temporal token if 2FA is enabled, otherwise it returns Access and Refresh tokens."
+			},
+			"response": []
+		},
+		{
+			"name": "Current User",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJKN0Z2MDBCMmtMbzFpZU1pIiwiaWF0IjoxNzI5MzMzNTI2LCJleHAiOjE3MjkzMzUzMjYsInN1YiI6ImFjY2Vzc0FwaSJ9.tTMnjuGfx9_sB-9vbnzxA17NFprYb_YLzx3bcsduqck",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/users/current",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"users",
+						"current"
+					]
+				},
+				"description": "All users can access this endpoint.\n\nThe Access token returned from the 'Login' route is entered in the header."
+			},
+			"response": []
+		},
+		{
+			"name": "Moderator",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJMN0xpT0ZXWFpMVVBGdTM1IiwiaWF0IjoxNzI5MzMzNjkyLCJleHAiOjE3MjkzMzU0OTIsInN1YiI6ImFjY2Vzc0FwaSJ9.KVm6QScfqGg0FVo8ik3oXkB2u9L2AnAhxqXJgmTvHpY",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/users/moderator/",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"users",
+						"moderator",
+						""
+					]
+				},
+				"description": "Users registered as 'Admin' or 'Moderator' can access this endpoint.\n\nThe Access token returned from the 'Login' route is entered in the header."
+			},
+			"response": []
+		},
+		{
+			"name": "Admin",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJKN0Z2MDBCMmtMbzFpZU1pIiwiaWF0IjoxNzI5MzMzNTI2LCJleHAiOjE3MjkzMzUzMjYsInN1YiI6ImFjY2Vzc0FwaSJ9.tTMnjuGfx9_sB-9vbnzxA17NFprYb_YLzx3bcsduqck",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"hescoffrey1@is.gd\",\r\n    \"password\": \"123456\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/users/admin",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"users",
+						"admin"
+					]
+				},
+				"description": "Users registered as 'Admin' can access this endpoint.\n\nThe Access token returned from the 'Login' route is entered in the header."
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh Token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"refreshToken\" : \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyOUZFemNRcVE1T3dvR3Z4IiwiaWF0IjoxNzI5MTU0ODkzLCJleHAiOjE3MjkxNTUwMTMsInN1YiI6InJlZnJlc2hUb2tlbiJ9.JrLVKHmytmJVLKq65kPTTjDuR4-C0UUamQs_aF6GFXM\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/auth/refresh-token",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"refresh-token"
+					]
+				},
+				"description": "The body takes the refresh token returned from Login route in order to generate new Access and Refresh tokens."
+			},
+			"response": []
+		},
+		{
+			"name": "Logout",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyOUZFemNRcVE1T3dvR3Z4IiwiaWF0IjoxNzI5MTU3MjY3LCJleHAiOjE3MjkxNTkwNjcsInN1YiI6ImFjY2Vzc0FwaSJ9.5_W6UVADXxFvXSIMGSMaHMiDEZ4VDrX1z17sDCEvclQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/auth/logout",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"logout"
+					]
+				},
+				"description": "The Access token is entered in header."
+			},
+			"response": []
+		},
+		{
+			"name": "Generate_2FA",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MjkxMk5SYVcxbktVUjAxIiwiaWF0IjoxNzI5NDEzMjI3LCJleHAiOjE3Mjk0MTUwMjcsInN1YiI6ImFjY2Vzc0FwaSJ9.mJmUaxJz06qo893HABx0ZjGbPzhuCLgH9KWAp0z79NI",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:3000/api/auth/2fa/generate",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"2fa",
+						"generate"
+					]
+				},
+				"description": "Generates \"Secret\" and sends the user a QR code containing that secret. The user should scan the QR code with an Authenticator app.\n\nTakes the Access token in the header."
+			},
+			"response": []
+		},
+		{
+			"name": "Validate_2FA",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MjkxMk5SYVcxbktVUjAxIiwiaWF0IjoxNzI5NDEzMjI3LCJleHAiOjE3Mjk0MTUwMjcsInN1YiI6ImFjY2Vzc0FwaSJ9.mJmUaxJz06qo893HABx0ZjGbPzhuCLgH9KWAp0z79NI",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"totp\": \"501371\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/auth/2fa/validate",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"2fa",
+						"validate"
+					]
+				},
+				"description": "It takes the Access token and the TOTP code generated by the Authenticator app.\n\nIf the user is validated successfully, the user's \"twoFaEnabled\" property is set to \"True.\""
+			},
+			"response": []
+		},
+		{
+			"name": "Login_2FA",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"tempToken\": \"cd49a08b-39af-447a-b88f-17abf784be36\",\r\n    \"totp\":\"933644\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/auth/2fa/login",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"2fa",
+						"login"
+					]
+				},
+				"description": "The body takes the Temporal token generated by the Login route and the TOTP code generated by the Authenticator app. If the user is successfully authenticated, it returns Access and Refresh tokens."
+			},
+			"response": []
+		}
+	]
+}

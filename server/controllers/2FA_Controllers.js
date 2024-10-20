@@ -73,7 +73,7 @@ export const login = async (req, res) => {
     try {
         const { tempToken, totp } = req.body;
 
-        if(!tempToken || !topt)
+        if(!tempToken || !totp)
             return res.status(422).json({ message: 'Please fill out all fields: tempToken and totp.' });
 
         const userId = db.cache.get(config.cacheTemporaryTokenPrefix + tempToken);
